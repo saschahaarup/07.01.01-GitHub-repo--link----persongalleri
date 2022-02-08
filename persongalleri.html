@@ -24,10 +24,38 @@
         margin: 10px;
         padding: 10px;
       }
+
+      #modal {
+        display: none;
+        width: 100%;
+        height: 100vh;
+        display: fixed;
+        background-color: gray;
+      }
+
+      #modal article {
+        max-width: 900px;
+        margin: 2em auto;
+        background-color: white;
+      }
     </style>
   </head>
   <body>
     <h1>Persongalleri</h1>
+
+    <nav>
+      <button>alle</button>
+    </nav>
+
+    <aside id="modal">
+      <article>
+        <h2></h2>
+        <img src="" alt="" />
+        <p></p>
+        <p></p>
+      </article>
+    </aside>
+
     <section></section>
     <template>
       <article>
@@ -41,8 +69,13 @@
     <script>
       // const fil = persongalleri j.son
       const url = "https://tema07-25be.restdb.io/rest/persongalleri";
+      const modal = document.querySelector("#modal");
       const template = document.querySelector("template");
       const section = document.querySelector("section");
+      const nav = document.querySelector("nav");
+
+      let filter = "alle";
+      let personer = [];
       const options = {
         headers: {
           "x-apikey": "61fcf8b73f215f310a37be85",
@@ -51,22 +84,62 @@
 
       async function hentData() {
         const resspons = await fetch(url, options);
-        const json = await resspons.json();
-        vis(json);
+        // const json = await resspons.json();
+        personer = await resspons.json();
+        bygFiltrerMenu();
+        vis(personer);
+      }
+
+      function bygFiltrerMenu() {
+        document.querySelector("nav button").addEventListener("click", filtrer);
+        let mulige = [];
+        personer.forEach((person) => {
+          if (!mulige.includes(person.troende)) {
+            mulige.push(person.troende);
+            const nyKnap = document.createElement("button");
+            nyKnap.textContent = person.troende;
+            nyKnap.addEventListener("click", filtrer);
+            nav.appendChild(nyKnap);
+          }
+        });
+      }
+      function filtrer() {
+        console.log(this.textContent);
+        filtrer = this.textContent;
+        section.textContent = "";
+        vis();
       }
 
       function vis(personliste) {
         // console.log(personliste);
-        personliste.forEach((person) => {
-          const klon = template.cloneNode(true).content;
-          klon.querySelector(".profilbillede").src =
-            "faces/" + person.profilbillede;
-          klon.querySelector(".fornavn").textContent = person.fornavn;
-          klon.querySelector(".efternavn").textContent = person.efternavn;
-          klon.querySelector(".email").textContent = person.email;
-          section.appendChild(klon);
+        personer.forEach((person) => {
+          if (filter == person.troende || filter == "alle") {
+            const klon = template.cloneNode(true).content;
+            klon.querySelector(".profilbillede").src =
+              "faces/" + person.profilbillede;
+            klon.querySelector(".fornavn").textContent = person.fornavn;
+            klon.querySelector(".efternavn").textContent = person.efternavn;
+            klon.querySelector(".email").textContent = person.email;
+            // pop op vindue
+            klon
+              .querySelector("article")
+              .addEventListener("click", () => visDetaljer(person));
+            // åbner i nyt vindue + tilbage knap
+            klon.querySelector("article").addEventListener("click", () => {
+              location.href = `personliste-singleveiw.html?id=${person._id}`;
+            });
+            section.appendChild(klon);
+          }
         });
       }
+      function visDetaljer(person) {
+        console.log(person);
+        modal.querySelector("h2").textContent = person.fornavn;
+        modal.querySelector("img").src = "faces/" + person.profilbillede;
+        modal.style.display = "block";
+      }
+
+      modal.addEventListener("click", () => (modal.style.display = "none"));
 
       hentData();
     </script>

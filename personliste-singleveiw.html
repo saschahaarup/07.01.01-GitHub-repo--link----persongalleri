@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      img {
+        width: 40%;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <button>Tilbage</button>
+      <article>
+        <h2 class="fornavn"></h2>
+        <h3 class="efternavn"></h3>
+        <p class="email"></p>
+        <img src="" alt="" class="profilbillede" />
+      </article>
+    </main>
+
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const id = urlParams.get("id");
+      console.log({ id });
+      let person;
+
+      const url = `https://tema07-25be.restdb.io/rest/persongalleri/${id}`;
+      const key = "61fcf8b73f215f310a37be85";
+
+      async function hentData() {
+        console.log("hentData");
+        const resspons = await fetch(url, {
+          method: `GET`,
+          headers: {
+            "content-Type": "application/json",
+            "x-apikey": key,
+          },
+        });
+
+        person = await resspons.json();
+        console.log({ person });
+        vis();
+      }
+
+      function vis() {
+        document.querySelector(".fornavn").textContent =
+          person.fornavn + "" + person.efternavn;
+        document.querySelector(".email").textContent = person.email;
+        document.querySelector("img").src = "faces/" + person.profilbillede;
+      }
+      hentData();
+
+      document.querySelector("button").addEventListener("click", () => {
+        history.back();
+      });
+    </script>
+  </body>
+</html>
